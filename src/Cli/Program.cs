@@ -1,28 +1,36 @@
-﻿using System.Runtime.InteropServices;
+﻿using Core;
 using System.Text.Json;
-using System.Text.Encodings.Web; 
+using System.Text.Encodings.Web;
+
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
+
 bool outputJson = args.Contains("--json");
 
-var appInfo = new
-{
-    Student = "Дранчак Ілля, ФЕІ-35",
-    OS_Description = RuntimeInformation.OSDescription,
-    OS_Environment = Environment.OSVersion.ToString(),
-    Architecture = RuntimeInformation.ProcessArchitecture.ToString(),
-    DotNet_Version = Environment.Version.ToString(),
-    Runtime = RuntimeInformation.FrameworkDescription,
-    App_Directory = AppContext.BaseDirectory,
-    Current_Directory = Environment.CurrentDirectory,
-    Domain = "Склад",
-    Entities = new[] { "Product", "StockBatch", "Warehouse", "Movement" },
-    Purpose = "облік залишків товарів по партіях"
-};
+
+EnvironmentReport report = EnvironmentInfo.Collect();
 
 if (outputJson)
 {
+    //  РЕЖИМ JSON
+    var appInfo = new
+    {
+        Student = "Дранчак Ілля, ФЕІ-35", 
+        OS_Description = report.OsDescription,
+        OS_Environment = Environment.OSVersion.ToString(),
+        Architecture = report.ProcessArchitecture,
+        DotNet_Version = Environment.Version.ToString(),
+        Runtime = report.FrameworkDescription,
+        App_Directory = report.BaseDirectory,
+        Current_Directory = Environment.CurrentDirectory,
+        DetectedRid = report.DetectedRid,
+        ReportedRid = report.ReportedRid,
+        Domain = "Склад",
+        Entities = new[] { "Product", "StockBatch", "Warehouse", "Movement" },
+        Purpose = "облік залишків товарів по партіях"
+    };
+
     var options = new JsonSerializerOptions 
     { 
         WriteIndented = true,
@@ -32,20 +40,15 @@ if (outputJson)
 }
 else
 {
-    Console.WriteLine("CrossApp – практикум з крос-платформного програмування");
-    Console.WriteLine($"Студент: {appInfo.Student}");
+
+    Console.WriteLine("CrossApp – інформація про середовище");
+    Console.WriteLine("Студент: Дранчак Ілля, ФЕІ-35"); 
     Console.WriteLine(new string('-', 52));
     
-    Console.WriteLine($"ОС(OSDescription)    : {appInfo.OS_Description}");
-    Console.WriteLine($"ОС(Environment)      : {appInfo.OS_Environment}");
-    Console.WriteLine($"Архітектура процесу  : {appInfo.Architecture}");
-    Console.WriteLine($"Версія .NET (CLR)    : {appInfo.DotNet_Version}");
-    Console.WriteLine($"Runtime              : {appInfo.Runtime}");
-    Console.WriteLine($"Каталог застосунку   : {appInfo.App_Directory}");
-    Console.WriteLine($"Поточний каталог     : {appInfo.Current_Directory}");
-    
-    Console.WriteLine(new string('-', 52));
-    Console.WriteLine($"Предметна область: {appInfo.Domain}");
-    Console.WriteLine($"Сутності: {string.Join(", ", appInfo.Entities)}");
-    Console.WriteLine($"Призначення: {appInfo.Purpose}");
+    Console.WriteLine($"ОС             : {report.OsDescription}");
+    Console.WriteLine($"Runtime        : {report.FrameworkDescription}");
+    Console.WriteLine($"Архітектура    : {report.ProcessArchitecture}");
+    Console.WriteLine($"RID(визначено) : {report.DetectedRid}");
+    Console.WriteLine($"RID(від.NET)   : {report.ReportedRid}");
+    Console.WriteLine($"Каталог        : {report.BaseDirectory}");
 }
