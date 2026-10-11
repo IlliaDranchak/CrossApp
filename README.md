@@ -33,4 +33,11 @@ dotnet run --project src/Cli -- --json
 |-------------------------|-------------------------------------|-----------------|--------|------------------|
 | **Framework-dependent** | `-r win-x64 --self-contained false` | 195 КБ          | 7      | Так (.NET 10)    |
 | **Self-contained**      | `-r win-x64 --self-contained true`  | 76.6 МБ         | 194    | Ні               |
+| **Single-File**         | `... -p:PublishSingleFile=true`     | 70.1 МБ         | 3      | Ні               |
+| **Trimmed**             | `... -p:PublishTrimmed=true`        | 12.5 МБ         | 3      | Ні               |
 
+
+### 4. Multi-targeting
+Бібліотеку `Core` налаштовано на збірку одразу для двох фреймворків: `<TargetFrameworks>net8.0;net10.0<
+/TargetFrameworks>`. 
+За допомогою директив умовної компіляції (`#if NET10_0_OR_GREATER`) вивід програми містить примітку про те, під яку версію .NET було зібрано код.
