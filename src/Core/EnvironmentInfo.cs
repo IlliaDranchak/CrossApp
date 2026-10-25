@@ -13,7 +13,7 @@ public sealed record EnvironmentReport(
 
 public static class EnvironmentInfo
 {
-    // Умовна компіляція: різна константа для різних версій .NET
+    // Умовна компіляція: різна для різних версій .NET
     #if NET10_0_OR_GREATER
     public const string BuildNote = "Збірка під net10.0";
     #else
@@ -27,7 +27,7 @@ public static class EnvironmentInfo
         DetectRid(),
         RuntimeInformation.RuntimeIdentifier,
         AppContext.BaseDirectory,
-        BuildNote); // Передаємо константу
+        BuildNote); 
 
     private static string DetectRid()
     {
