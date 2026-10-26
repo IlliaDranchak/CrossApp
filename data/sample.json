@@ -1,0 +1,6 @@
+[
+  { "Id": "P-101", "Sku": "SKU-101", "Name": "Болт М10x50", "Unit": "шт", "Quantity": 500 },
+  { "Id": "P-102", "Sku": "SKU-102", "Name": "Гайка М10", "Unit": "шт", "Quantity": 1200 },
+  { "Id": "P-103", "Sku": "SKU-103", "Name": "Шайба 10мм", "Unit": "шт", "Quantity": 2000 },
+  { "Id": "P-104", "Sku": "SKU-104", "Name": "Гвинт М8x30", "Unit": "шт", "Quantity": 800 }
+]

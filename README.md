@@ -9,25 +9,59 @@
 ## Структура проєкту
 ```text
 CrossApp/
-├── CrossApp.sln
-├── README.md
-├── .gitignore
-└── src/
-    ├── Core/          # Бібліотека класів (логіка збору даних)
-    │   ├── Core.csproj
-    │   └── EnvironmentInfo.cs
-    └── Cli/           # Консольний застосунок (точка входу, вивід)
-        ├── Cli.csproj
-        └── Program.cs
+├── data/
+│   ├── sample.csv      # Тестові дані (10+ рядків, 3 з дефектами)
+│   ├── sample.json     # Тестові дані у форматі JSON
+│   └── mixed.csv       # Різнорідні дані (товари P та склади W)
+│   └── clean.csv #Тестові дані без дефектів
+── src/
+│   ├── Core/
+│   │   ├── EnvironmentInfo.cs  # Інформація про середовище 
+│   │   ├── Dto/                # Незмінні типи даних (DTO)
+│   │   │   ├── ProductDto.cs
+│   │   │   ├── WarehouseDto.cs
+│   │   │   ├── ImportResult.cs
+│   │   │   └── MixedImportResult.cs
+│   │   └── Import/             # Логіка розбору файлів
+│   │       ├── ProductCsvImporter.cs
+│   │       ├── ProductJsonImporter.cs
+│   │       └── MixedCsvImporter.cs
+│   ── Cli/
+│       └── Program.cs          # Точка входу та вивід
+└── CrossApp.sln
 
 # Збірка проєкту
 dotnet build
 
-# Запуск у режимі таблиці
+# Імпорт стандартного CSV-файлу складу (data/sample.csv за замовчуванням)
 dotnet run --project src/Cli
 
-# Запуск з виводом у форматі JSON
-dotnet run --project src/Cli -- --json
+# Імпорт JSON-файлу (автоматичний вибір парсера за розширенням .json)
+dotnet run --project src/Cli -- data/sample.json
+
+# Імпорт змішаного CSV-файлу товарів та складів (префікси P і W)
+dotnet run --project src/Cli -- --mixed
+
+# Запуск з довільним шляхом до файлу
+dotnet run --project src/Cli -- data/not-exist.csv
+
+### Додатково реалізовано:
+
+JSON-імпортер (ProductJsonImporter) з використанням System.Text.Json та PropertyNameCaseInsensitive.
+
+Змішаний імпорт (MixedCsvImporter), який за префіксом (P або W) в одному файлі розподіляє рядки по різних DTO за допомогою одного switch.
+
+Статистика імпорту (Total, Accepted, Rejected, ErrorRate) в ImportResult.
+
+### Формат файлів
+
+Роздільник: крапка з комою (;), щоб уникнути конфліктів з комами в назвах.
+
+Кодування: UTF-8.
+
+Заголовок: перший рядок може містити заголовки (наприклад, id;sku;name...), програма автоматично його пропускає.
+
+Коментарі: рядки, що починаються з #, ігноруються.
 
 | Режим публікації        | Аргументи команди                   | Розмір каталогу | Файлів | Потрібен runtime |
 |-------------------------|-------------------------------------|-----------------|--------|------------------|
