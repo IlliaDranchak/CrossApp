@@ -23,9 +23,12 @@ CrossApp/
 │   │   │   ├── ImportResult.cs
 │   │   │   └── MixedImportResult.cs
 │   │   └── Import/             # Логіка розбору файлів
-│   │       ├── ProductCsvImporter.cs
-│   │       ├── ProductJsonImporter.cs
-│   │       └── MixedCsvImporter.cs
+│   │   │   ├── ProductCsvImporter.cs
+│   │   │    ├── ProductJsonImporter.cs
+│   │   │    └── MixedCsvImporter.cs
+│   │   │
+│   │   │──Domain/
+│   │      ├──Product.cs
 │   ── Cli/
 │       └── Program.cs          # Точка входу та вивід
 └── CrossApp.sln
@@ -71,7 +74,14 @@ JSON-імпортер (ProductJsonImporter) з використанням System
 | **Trimmed**             | `... -p:PublishTrimmed=true`        | 12.5 МБ         | 3      | Ні               |
 
 
-### 4. Multi-targeting
-Бібліотеку `Core` налаштовано на збірку одразу для двох фреймворків: `<TargetFrameworks>net8.0;net10.0<
-/TargetFrameworks>`. 
-За допомогою директив умовної компіляції (`#if NET10_0_OR_GREATER`) вивід програми містить примітку про те, під яку версію .NET було зібрано код.
+### Інваріанти (Бізнес-правила)
+1. **SKU не може бути порожнім.** Перевіряється у фабричному методі `Create`. Тип винятку: `ArgumentException`.
+2. **Початкова кількість не може бути від'ємною.** Перевіряється у `Create`. Тип винятку: `ArgumentOutOfRangeException`.
+3. **Не можна видати більше товару, ніж є на складі.** Перевіряється у методі `Issue`. Тип винятку: `InvalidOperationException`.
+4. **Кількість приходу/видачі має бути більшою за нуль.** Перевіряється в методах `RegisterArrival` та `Issue`. Тип винятку: `ArgumentOutOfRangeException`.
+
+### Архітектурні рішення
+- **Приватний конструктор:** Забороняє створення об'єкта в обхід перевірок (`new Product(...)` не скомпілюється ззовні).
+- **Фабричний метод `Create`:** Єдина точка входу для створення сутності.
+- **Інкапсуляція:** Стан (`_quantity`) прихований у приватному полі. Змінити його можна лише через публічні методи, які спочатку перевіряють інваріанти, а потім змінюють дані.
+- **DTO vs Сутність:** `ProductDto` (record) залишився для перенесення даних з файлів. `Product` (class) — це модель з поведінкою. Мапінг між ними здійснюється через `ToDto()` та `FromDto()`.
