@@ -2,10 +2,14 @@ using Core.Dto;
 
 namespace Core.Domain;
 
+public enum ProductStatus { Draft, Active, Archived }
+
 public sealed class Product
 {
     // Приватне поле для зберігання стану (інкапсуляція)
     private int _quantity;
+    private ProductStatus _status = ProductStatus.Draft;
+    public ProductStatus Status => _status;
 
     // Властивості лише для читання (без set і init)
     public string Id { get; }
@@ -76,6 +80,21 @@ public sealed class Product
         _quantity -= amount;
     }
 
+    public void ChangeStatus(ProductStatus newStatus)
+    {
+        // Перевірка допустимих переходів через кортежі та switch expression
+        bool allowed = (_status, newStatus) switch
+        {
+            (ProductStatus.Draft, ProductStatus.Active) => true,
+            (ProductStatus.Active, ProductStatus.Archived) => true,
+            _ => false
+        };
+
+        if (!allowed)
+            throw new InvalidOperationException($"Недопустимий перехід статусу: з {_status} у {newStatus}");
+
+        _status = newStatus;
+    }
     // Мапінг у DTO (для сховища з 5-го тижня)
     public ProductDto ToDto() => new(Id, Sku, Name, Unit, Quantity);
     

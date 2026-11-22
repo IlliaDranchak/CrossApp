@@ -1,4 +1,5 @@
 using Core.Dto;
+using Core.Domain;
 
 namespace Core.Import;
 
@@ -53,8 +54,31 @@ public static class ProductCsvImporter
             _ => new ParseFailed($"занадто багато колонок: {parts.Length}")
         };
     }
+// Міст між тижнем 3 (DTO) і тижнем 4 (Domain)
+    public static ImportResult<Product> ToDomain(ImportResult<ProductDto> dtoResult)
+    {
+        var items = new List<Product>();
+        // Зберігаємо помилки, які вже були на етапі читання CSV
+        var errors = new List<string>(dtoResult.Errors); 
 
+        foreach (var dto in dtoResult.Items)
+        {
+            try
+            {
+                // FromDto викличе Create, який перевірить інваріанти
+                items.Add(Product.FromDto(dto));
+            }
+            catch (Exception ex)
+            {
+                // Якщо інваріант порушено, додаємо в список помилок, а не падаємо
+                errors.Add($"Порушення інваріанту для {dto.Id}: {ex.Message}");
+            }
+        }
+
+        return new ImportResult<Product>(items, errors);
+    }
     private abstract record ParseOutcome;
     private sealed record ParseOk(ProductDto Value) : ParseOutcome;
     private sealed record ParseFailed(string Reason) : ParseOutcome;
 }
+    
